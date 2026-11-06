@@ -5,209 +5,110 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Acortador de enlaces</title>
 <style>
-  :root{
-    --bg:#f6f7f9; --card:#ffffff; --text:#1c2024; --muted:#6b7280;
-    --line:#e5e7eb; --accent:#1F4E79; --accent2:#2E75B6; --ok:#157347; --code:#f0f2f5;
-  }
-  @media (prefers-color-scheme: dark){
-    :root{ --bg:#0f1115; --card:#191c22; --text:#e7e9ee; --muted:#9aa2af;
-      --line:#2a2e37; --accent:#5b9bd5; --accent2:#7fb0e0; --ok:#4caf50; --code:#12151a; }
-  }
+  :root{--bg:#f6f7f9;--card:#fff;--text:#1c2024;--muted:#6b7280;--line:#e5e7eb;
+    --accent:#1F4E79;--accent2:#2E75B6;--code:#f0f2f5}
+  @media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#191c22;--text:#e7e9ee;
+    --muted:#9aa2af;--line:#2a2e37;--accent:#5b9bd5;--accent2:#7fb0e0;--code:#12151a}}
   *{box-sizing:border-box}
   body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
     background:var(--bg);color:var(--text);line-height:1.5;padding:16px}
-  .wrap{max-width:760px;margin:0 auto}
+  .wrap{max-width:680px;margin:0 auto}
   header{margin:12px 2px 20px}
   h1{font-size:22px;margin:0;color:var(--accent)}
   .sub{color:var(--muted);font-size:14px;margin-top:4px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;
-    padding:18px;margin-bottom:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
   label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
   input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:8px;
     background:transparent;color:var(--text);font-size:15px}
   button{padding:11px 16px;border:none;border-radius:8px;background:var(--accent);
     color:#fff;font-size:15px;cursor:pointer;margin-top:12px}
   button.sec{background:transparent;color:var(--accent2);border:1px solid var(--accent2)}
-  button:active{transform:translateY(1px)}
-  .result{margin-top:14px;padding:12px;border:1px dashed var(--accent2);border-radius:8px;
-    display:none}
+  button.mini{padding:5px 10px;font-size:12px;margin:8px 8px 0 0}
+  .result{margin-top:16px;padding:14px;border:1px dashed var(--accent2);border-radius:8px;display:none}
   .result.show{display:block}
-  .short{font-weight:600;word-break:break-all;color:var(--accent2)}
-  table{width:100%;border-collapse:collapse;margin-top:6px;font-size:14px}
-  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
-  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
-  td.dest{word-break:break-all;color:var(--muted);font-size:12px;max-width:220px}
-  .pill{display:inline-block;background:var(--code);border-radius:6px;padding:2px 8px;
-    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
-  .mini{background:transparent;color:var(--accent2);border:1px solid var(--line);
-    padding:5px 9px;font-size:12px;margin:0;border-radius:6px}
+  .short{font-weight:600;word-break:break-all;color:var(--accent2);margin:4px 0}
+  pre{background:var(--code);padding:10px;border-radius:8px;overflow:auto;font-size:13px;
+    white-space:pre-wrap;word-break:break-all;margin:4px 0}
   .note{font-size:12px;color:var(--muted);margin-top:18px;padding:0 2px}
-  a{color:var(--accent2)}
   .redir{text-align:center;padding:60px 20px;color:var(--muted)}
+  a{color:var(--accent2)}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div id="redir" class="redir" style="display:none"><p id="redirMsg">Redirigiendo…</p></div>
 
-  <!-- Vista de redireccion (cuando se entra con ?c=codigo) -->
-  <div id="redir" class="redir" style="display:none">
-    <p id="redirMsg">Redirigiendo…</p>
-  </div>
-
-  <!-- App principal -->
   <div id="app" style="display:none">
     <header>
       <h1>Acortador de enlaces</h1>
-      <div class="sub">Crea enlaces cortos para escribir en etiquetas NFC. Sin servidores: todo vive en GitHub Pages.</div>
+      <div class="sub">Genera un enlace corto para escribir en una etiqueta NFC. No guarda historial.</div>
     </header>
-
     <div class="card">
-      <strong>Crear enlace corto</strong>
       <label for="url">Enlace largo (destino)</label>
       <input id="url" type="url" placeholder="https://app.powerbi.com/...">
-      <label for="code">Código corto (opcional — se genera uno si lo dejas vacío)</label>
+      <label for="code">Código corto (opcional)</label>
       <input id="code" type="text" placeholder="reporte-taller" autocomplete="off">
-      <label for="label">Etiqueta / descripción (opcional)</label>
+      <label for="label">Descripción (opcional)</label>
       <input id="label" type="text" placeholder="Reporte de inventario" autocomplete="off">
-      <button onclick="agregar()">Agregar enlace</button>
+      <button onclick="generar()">Generar enlace corto</button>
 
       <div id="result" class="result">
         <div>Tu enlace corto:</div>
         <div class="short" id="shortOut"></div>
         <button class="mini" onclick="copiar(document.getElementById('shortOut').textContent)">Copiar enlace</button>
-        <hr style="border:none;border-top:1px solid var(--line);margin:12px 0">
-        <div style="font-size:13px;color:var(--muted)">
-          Para que quede guardado, descarga el archivo actualizado y súbelo a tu repositorio (reemplaza <span class="pill">links.json</span>):
+        <div style="margin-top:12px;font-size:13px;color:var(--muted)">
+          Agrega esta línea dentro de las llaves <code>{ }</code> de tu <b>links.json</b>:
         </div>
-        <button class="sec" onclick="descargar()">Descargar links.json actualizado</button>
+        <pre id="jsonOut"></pre>
+        <button class="mini" onclick="copiar(document.getElementById('jsonOut').textContent)">Copiar línea</button>
+        <button class="mini sec" onclick="descargar()">Descargar links.json (si está vacío)</button>
       </div>
     </div>
-
-    <div class="card">
-      <strong>Enlaces existentes</strong>
-      <table>
-        <thead><tr><th>Código</th><th>Descripción</th><th>Destino</th><th></th></tr></thead>
-        <tbody id="list"></tbody>
-      </table>
-    </div>
-
     <div class="note">
-      El archivo <span class="pill">links.json</span> es público en tu repositorio, así que cualquiera que vea el repo puede leer los destinos (no las credenciales: abrir el reporte sigue pidiendo iniciar sesión). Si es contenido interno, revisa la política de TI de tu empresa.
+      El archivo <b>links.json</b> guarda solo los enlaces que tú agregues, para que la redirección funcione. Es público en el repositorio, así que no pongas ahí URLs con credenciales dentro.
     </div>
   </div>
-
 </div>
 
 <script>
-var links = {};
-
-// ---- Base del sitio (para armar los enlaces cortos) ----
 function baseUrl(){
   var b = location.origin + location.pathname.replace(/index\.html$/,'');
   if(!b.endsWith('/')) b += '/';
   return b;
 }
-function shortUrlFor(code){ return baseUrl() + encodeURIComponent(code); }
 
-// ---- Cargar datos ----
-function cargar(){
-  return fetch('links.json', {cache:'no-store'})
-    .then(function(r){ return r.ok ? r.json() : {}; })
-    .then(function(data){ links = data || {}; })
-    .catch(function(){ links = {}; });
-}
+// Modo redirección:  ...?c=codigo
+(function(){
+  var code = new URLSearchParams(location.search).get('c');
+  if(!code){ document.getElementById('app').style.display='block'; return; }
+  document.getElementById('redir').style.display='block';
+  fetch('links.json',{cache:'no-store'}).then(function(r){return r.json();}).then(function(m){
+    var e=m[code], u=e&&(e.url||e);
+    if(u) location.replace(u);
+    else document.getElementById('redirMsg').innerHTML='No se encontró <b>'+code+'</b>. <a href="'+baseUrl()+'">Inicio</a>';
+  }).catch(function(){ document.getElementById('redirMsg').textContent='No se pudo cargar links.json'; });
+})();
 
-// ---- Modo redireccion: ?c=codigo ----
-function intentarRedirigir(){
-  var params = new URLSearchParams(location.search);
-  var code = params.get('c');
-  if(!code) return false;
-  document.getElementById('redir').style.display = 'block';
-  cargar().then(function(){
-    var entry = links[code];
-    var url = entry && (entry.url || entry);
-    if(url){ location.replace(url); }
-    else{
-      document.getElementById('redirMsg').innerHTML =
-        'No se encontró el enlace <b>'+code+'</b>. <a href="'+baseUrl()+'">Ir al inicio</a>';
-    }
-  });
-  return true;
-}
+function generar(){
+  var url=document.getElementById('url').value.trim();
+  var code=document.getElementById('code').value.trim();
+  var label=document.getElementById('label').value.trim();
+  if(!/^https?:\/\//i.test(url)){ alert('Escribe un enlace que empiece con http:// o https://'); return; }
+  if(!code) code=Math.random().toString(36).slice(2,8);
+  code=code.toLowerCase().replace(/[^a-z0-9\-_]/g,'-');
 
-// ---- Render de la lista ----
-function render(){
-  var tbody = document.getElementById('list');
-  tbody.innerHTML = '';
-  var codes = Object.keys(links);
-  if(codes.length === 0){
-    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted)">Aún no hay enlaces.</td></tr>';
-    return;
-  }
-  codes.forEach(function(code){
-    var e = links[code];
-    var url = e.url || e;
-    var label = e.label || '';
-    var tr = document.createElement('tr');
-    tr.innerHTML =
-      '<td><span class="pill">'+code+'</span></td>'+
-      '<td>'+escapeHtml(label)+'</td>'+
-      '<td class="dest">'+escapeHtml(url)+'</td>'+
-      '<td><button class="mini">Copiar corto</button></td>';
-    tr.querySelector('button').onclick = function(){ copiar(shortUrlFor(code)); };
-    tbody.appendChild(tr);
-  });
-}
-
-// ---- Agregar un enlace ----
-function agregar(){
-  var url = document.getElementById('url').value.trim();
-  var code = document.getElementById('code').value.trim();
-  var label = document.getElementById('label').value.trim();
-
-  if(!/^https?:\/\//i.test(url)){ alert('Escribe un enlace válido que empiece con http:// o https://'); return; }
-  if(!code){ code = codigoAleatorio(); }
-  code = code.toLowerCase().replace(/[^a-z0-9\-_]/g,'-');
-  if(links[code] && !confirm('El código "'+code+'" ya existe. ¿Reemplazarlo?')) return;
-
-  links[code] = { url:url, label:label, created:new Date().toISOString().slice(0,10) };
-  render();
-
-  document.getElementById('shortOut').textContent = shortUrlFor(code);
+  document.getElementById('shortOut').textContent = baseUrl()+code;
+  document.getElementById('jsonOut').textContent =
+    JSON.stringify(code)+': '+JSON.stringify({url:url,label:label});
   document.getElementById('result').classList.add('show');
-}
 
-function codigoAleatorio(){
-  return Math.random().toString(36).slice(2,8);
+  window._entry={}; window._entry[code]={url:url,label:label};
 }
-
-// ---- Descargar links.json actualizado ----
 function descargar(){
-  var blob = new Blob([JSON.stringify(links, null, 2)], {type:'application/json'});
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'links.json';
-  a.click();
+  var blob=new Blob([JSON.stringify(window._entry||{},null,2)],{type:'application/json'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='links.json'; a.click();
 }
-
-// ---- Utilidades ----
-function copiar(txt){
-  navigator.clipboard.writeText(txt).then(
-    function(){ alert('Copiado:\n'+txt); },
-    function(){ prompt('Copia manualmente:', txt); }
-  );
-}
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, function(c){
-    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
-  });
-}
-
-// ---- Arranque ----
-if(!intentarRedirigir()){
-  document.getElementById('app').style.display = 'block';
-  cargar().then(render);
-}
+function copiar(t){ navigator.clipboard.writeText(t).then(function(){alert('Copiado:\n'+t);},function(){prompt('Copia:',t);}); }
 </script>
 </body>
 </html>
