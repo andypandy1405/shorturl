@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Redirigiendo…</title>
+<style>
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:#f6f7f9;color:#1c2024;display:flex;min-height:100vh;
+    align-items:center;justify-content:center;text-align:center;padding:24px}
+  @media (prefers-color-scheme: dark){ body{background:#0f1115;color:#e7e9ee} }
+  a{color:#2E75B6}
+</style>
+</head>
+<body>
+<div>
+  <p id="msg">Redirigiendo…</p>
+</div>
+<script>
+/*
+ * GitHub Pages sirve este 404.html cuando se visita una ruta que no existe
+ * como archivo, por ejemplo  usuario.github.io/repo/powerbi
+ * Aqui tomamos el ultimo segmento de la ruta (el codigo corto),
+ * buscamos su destino en links.json y redirigimos.
+ */
+(function(){
+  var parts = location.pathname.split('/').filter(Boolean);
+  var code = parts.length ? decodeURIComponent(parts[parts.length - 1]) : '';
+
+  // 'links.json' relativo a /repo/codigo  ->  /repo/links.json
+  fetch('links.json', {cache:'no-store'})
+    .then(function(r){ return r.json(); })
+    .then(function(map){
+      var entry = map[code];
+      var url = entry && (entry.url || entry);
+      if(url){ location.replace(url); }
+      else{ noEncontrado(code); }
+    })
+    .catch(function(){ noEncontrado(code); });
+
+  function noEncontrado(c){
+    document.getElementById('msg').innerHTML =
+      'No se encontró el enlace <b>' + (c || '') + '</b>.';
+  }
+})();
+</script>
+</body>
+</html>
