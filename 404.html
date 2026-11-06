@@ -8,6 +8,37 @@
   body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
     background:#f6f7f9;color:#1c2024;display:flex;min-height:100vh;
     align-items:center;justify-content:center;text-align:center;padding:24px}
+  @media (prefers-color-scheme:dark){body{background:#0f1115;color:#e7e9ee}}
+  a{color:#2E75B6}
+</style>
+</head>
+<body>
+<div><p id="msg">Redirigiendo…</p></div>
+<script>
+(function(){
+  var parts = location.pathname.split('/').filter(Boolean);
+  var code = parts.length ? decodeURIComponent(parts[parts.length-1]) : '';
+  fetch('links.json',{cache:'no-store'})
+    .then(function(r){return r.json();})
+    .then(function(map){
+      var e=map[code], u=e&&(e.url||e);
+      if(u){ location.replace(u); }
+      else{ document.getElementById('msg').innerHTML='No se encontró <b>'+(code||'')+'</b>.'; }
+    })
+    .catch(function(){ document.getElementById('msg').innerHTML='No se encontró <b>'+(code||'')+'</b>.'; });
+})();
+</script>
+</body>
+</html><!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Redirigiendo…</title>
+<style>
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:#f6f7f9;color:#1c2024;display:flex;min-height:100vh;
+    align-items:center;justify-content:center;text-align:center;padding:24px}
   @media (prefers-color-scheme: dark){ body{background:#0f1115;color:#e7e9ee} }
   a{color:#2E75B6}
 </style>
